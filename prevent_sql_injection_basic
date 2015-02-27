@@ -1,0 +1,51 @@
+<?php
+
+//conexao SQLI
+$sqli = mysqli_connect("localhost","_your_database_username_","_your_password_here","_your_database_here");
+
+//Consulta
+//SELECT campos{id,nome,senha} FROM tabela{usuario} WHERE nome=indefinido{?}
+$sql = "SELECT id,nome,senha FROM usuario WHERE nome=?";
+
+//Preparo da consulta
+
+$st = $sqli->prepare($sql);
+
+if(!$st){
+	die("Erro ao preparar");
+}
+
+//Variaveis(el), provenientes do formulario
+$usr = "teste1";
+//$usr = "teste' OR 1=1; --'";
+$usr = preg_replace("/\W/","",$usr);
+$usr = mysqli_real_escape_string($sqli,$usr);
+
+//Saida da variavel definida
+echo $usr."<br/>";
+
+$bnd = $st->bind_param("s",$usr);
+
+if(!$bnd){
+	die("Erro ao vincular");
+}
+
+$exec = $st->execute();
+
+if(!$exec){
+	die("Erro ao executar");
+}
+
+$st->bind_result($id,$nome,$senha);
+while($st->fetch()){
+	echo "ID: ". $id. "<br/>";
+	echo "NOME: ". $nome. "<br/>";
+	echo "SENHA: ". $senha. "<br/>";
+}
+
+
+$st->free_result();
+$st->close();
+$sqli->close();
+
+?>
